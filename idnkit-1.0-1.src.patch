@@ -1,0 +1,64 @@
+--- origsrc/idnkit-1.0-src/configure.in	2003-03-10 17:53:20.000000000 -0600
++++ src/idnkit-1.0-src/configure.in	2010-07-01 03:07:19.804804500 -0500
+@@ -630,10 +630,7 @@ changequote([, ])dnl
+ fi
+ 
+ dnl Find system shared object paths.
+-AC_FIND_SYSTEM_SHOBJ(libc)
+-if test "$install_runidn" = yes ; then
+-    AC_FIND_SYSTEM_SHOBJ(libnsl)
+-fi
++AC_DEFINE_UNQUOTED(SOPATH_LIBC, "/usr/bin/cygwin1.dll")
+ 
+ dnl Checks for iconv library.
+ if test "$liteonly" != yes ; then
+--- origsrc/idnkit-1.0-src/lib/Makefile.in	2003-03-12 10:14:41.000000000 -0600
++++ src/idnkit-1.0-src/lib/Makefile.in	2010-07-01 03:26:02.139998400 -0500
+@@ -198,12 +198,12 @@ all: all-localdir all-subdirs
+ $(LIB).la: $(OBJS)
+ 	$(LIBTOOL) --mode=link $(LD) $(LDFLAGS) -o $@ \
+ 	    -version-info $(LIB_CURRENT):$(LIB_REVISION):$(LIB_AGE) \
+-	    -rpath $(libdir) $(OBJS)
++	    -no-undefined -rpath $(libdir) $(OBJS) @LIBS@
+ 
+ $(TESTLIB).la: $(OBJS)
+ 	$(LIBTOOL) --mode=link $(LD) $(LDFLAGS) -o $@ \
+ 	    -version-info $(LIB_CURRENT):$(LIB_REVISION):$(LIB_AGE) \
+-	    -rpath $(libdir) $(OBJS)
++	    -no-undefined -rpath $(libdir) $(OBJS) @LIBS@
+ 
+ apilite.lo: api.c
+ 	$(LIBTOOL) --mode=compile $(CC) $(LITELIBCFLAGS) -o $@ \
+@@ -221,12 +221,12 @@ resconflite.lo: resconf.c
+ $(LITELIB).la: $(LITELIB_OBJS)
+ 	$(LIBTOOL) --mode=link $(LD) $(LDFLAGS) -o $@ \
+ 	    -version-info $(LIB_CURRENT):$(LIB_REVISION):$(LIB_AGE) \
+-	    -rpath $(libdir) $(LITELIB_OBJS)
++	    -no-undefined -rpath $(libdir) $(LITELIB_OBJS) @LIBS@
+ 
+ $(TESTLITELIB).la: $(LITELIB_OBJS)
+ 	$(LIBTOOL) --mode=link $(LD) $(LDFLAGS) -o $@ \
+ 	    -version-info $(LIB_CURRENT):$(LIB_REVISION):$(LIB_AGE) \
+-	    -rpath $(libdir) $(LITELIB_OBJS)
++	    -no-undefined -rpath $(libdir) $(LITELIB_OBJS) @LIBS@
+ 
+ idn.conf.sample: idn.conf.sample.in
+ 	sed -e 's%[@]mapdir[@]%$(mapdir)%' \
+@@ -241,7 +241,7 @@ install: install-localdir install-subdir
+ 
+ install-common:
+ 	$(MKINSTALLDIRS) $(DESTDIR)$(libdir)
+-	$(LIBTOOL) $(INSTALL_DATA) $(LITELIB).la \
++	$(LIBTOOL) --mode=install $(INSTALL_DATA) $(LITELIB).la \
+ 	    $(DESTDIR)$(libdir)/$(LITELIB).la
+ 	-[ -f $(DESTDIR)$(libdir)/$(LITELIB).a ] \
+ 	    && $(RANLIB) $(DESTDIR)$(libdir)/$(LITELIB).a
+@@ -262,7 +262,7 @@ install-common:
+ 
+ install-nolite:
+ 	$(MKINSTALLDIRS) $(DESTDIR)$(libdir)
+-	$(LIBTOOL) $(INSTALL_DATA) $(LIB).la \
++	$(LIBTOOL) --mode=install $(INSTALL_DATA) $(LIB).la \
+ 	    $(DESTDIR)$(libdir)/$(LIB).la
+ 	-[ -f $(DESTDIR)$(libdir)/$(LIB).a ] \
+ 	    && $(RANLIB) $(DESTDIR)$(libdir)/$(LIB).a
